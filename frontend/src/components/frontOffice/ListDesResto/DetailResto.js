@@ -48,11 +48,11 @@ function DetailResto() {
   }));
 
   // ✅ FIX 1: removed selectedCategory from deps so it sets on first load correctly
-  useEffect(() => {
+useEffect(() => {
     if (categories.length > 0 && !selectedCategory) {
       setSelectedCategory(categories[0].id);
     }
-  }, [categories.length]);
+  }, [categories.length,categories,selectedCategory]);
 
   // ✅ FIX 2: show all plats if no category selected yet (fallback)
   const getCurrentMenuItems = () => {
