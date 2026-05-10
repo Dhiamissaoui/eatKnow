@@ -17,11 +17,14 @@ function DetailResto() {
   const [addedItem, setAddedItem] = useState(null);
   const sectionRef = useRef(null);
 
-  // Get restaurant and plats from Redux state
   const { selected: restaurant, loading: restaurantLoading, error: restaurantError } = useSelector(state => state.restaurants);
   const { list: plats, loading: platsLoading } = useSelector(state => state.plats);
 
-  // Fetch restaurant and plats when component mounts
+  // Reset selectedCategory when restaurant changes
+  useEffect(() => {
+    setSelectedCategory('');
+  }, [id]);
+
   useEffect(() => {
     if (id) {
       dispatch(fetchRestaurantById(id));
@@ -37,7 +40,6 @@ function DetailResto() {
     return acc;
   }, {});
 
-  // Get all available categories
   const categories = Object.keys(groupedPlats).map(cat => ({
     id: cat,
     label: cat,
@@ -45,16 +47,16 @@ function DetailResto() {
     count: groupedPlats[cat].length
   }));
 
-  // Set default selected category when plats load
+  // ✅ FIX 1: removed selectedCategory from deps so it sets on first load correctly
   useEffect(() => {
     if (categories.length > 0 && !selectedCategory) {
       setSelectedCategory(categories[0].id);
     }
-  }, [categories, selectedCategory]);
+  }, [categories.length]);
 
-  // Get current menu items based on selected category
+  // ✅ FIX 2: show all plats if no category selected yet (fallback)
   const getCurrentMenuItems = () => {
-    if (!selectedCategory) return [];
+    if (!selectedCategory) return plats || [];
     return groupedPlats[selectedCategory] || [];
   };
 
@@ -68,11 +70,7 @@ function DetailResto() {
       },
       { threshold: 0.1 }
     );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -137,17 +135,11 @@ function DetailResto() {
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating || 0);
-    
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={i} className="text-yellow-400">★</span>);
-    }
-    for (let i = stars.length; i < 5; i++) {
-      stars.push(<span key={i} className="text-gray-300">★</span>);
-    }
+    for (let i = 0; i < fullStars; i++) stars.push(<span key={i} className="text-yellow-400">★</span>);
+    for (let i = stars.length; i < 5; i++) stars.push(<span key={i} className="text-gray-300">★</span>);
     return stars;
   };
 
-  // Loading state
   if (restaurantLoading || platsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center">
@@ -159,7 +151,6 @@ function DetailResto() {
     );
   }
 
-  // Error state
   if (restaurantError || !restaurant) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center">
@@ -168,10 +159,7 @@ function DetailResto() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <p className="text-red-600 text-lg mb-2">Restaurant non trouvé</p>
-          <button
-            onClick={() => navigate('/ListResto')}
-            className="mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
-          >
+          <button onClick={() => navigate('/ListResto')} className="mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
             Retour aux restaurants
           </button>
         </div>
@@ -185,14 +173,11 @@ function DetailResto() {
       <div className="relative h-[300px] md:h-[350px] w-full overflow-hidden">
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url(${restaurant.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200'})`,
-          }}
+          style={{ backgroundImage: `url(${restaurant.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200'})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30"></div>
         </div>
 
-        {/* Bouton Retour */}
         <button 
           onClick={() => navigate(-1)}
           className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-2 transition-all duration-300 shadow-lg hover:scale-110"
@@ -202,7 +187,6 @@ function DetailResto() {
           </svg>
         </button>
 
-        {/* Bouton Favori */}
         <button 
           onClick={() => setIsFavorite(!isFavorite)}
           className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-2 transition-all duration-300 shadow-lg hover:scale-110"
@@ -210,17 +194,13 @@ function DetailResto() {
           <svg 
             className={`w-6 h-6 transition-all duration-300 ${isFavorite ? 'text-red-500 fill-current scale-110' : 'text-gray-800'}`} 
             fill={isFavorite ? 'currentColor' : 'none'} 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
+            stroke="currentColor" viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         </button>
 
-        {/* Informations du restaurant */}
-        <div className={`absolute bottom-0 left-0 right-0 p-6 text-white transition-all duration-1000 transform ${
-          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-        }`}>
+        <div className={`absolute bottom-0 left-0 right-0 p-6 text-white transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-wrap items-center gap-2 mb-2">
               {restaurant.is_active ? (
@@ -280,7 +260,7 @@ function DetailResto() {
             </div>
           </div>
 
-          {/* Categories */}
+          {/* Categories + Plats */}
           {categories.length > 0 ? (
             <>
               <div className="bg-white border-b border-gray-200 sticky top-[60px] z-10">
@@ -305,7 +285,6 @@ function DetailResto() {
                 </div>
               </div>
 
-              {/* Plats List */}
               <div className="max-w-7xl mx-auto px-4 py-8">
                 {getCurrentMenuItems().length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -419,9 +398,7 @@ function DetailResto() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h3 className="font-semibold text-gray-800 text-lg">{item.name}</h3>
-                      <p className="text-orange-500 font-medium mt-1">
-                        {item.price.toLocaleString()} FCFA
-                      </p>
+                      <p className="text-orange-500 font-medium mt-1">{item.price.toLocaleString()} FCFA</p>
                     </div>
                     <button 
                       onClick={() => removeFromCart(item.id)}
@@ -437,22 +414,14 @@ function DetailResto() {
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className="w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300 transition-all flex items-center justify-center font-bold hover:scale-110"
-                      >
-                        −
-                      </button>
-                      <span className="font-semibold text-gray-700 w-8 text-center text-lg">
-                        {item.quantity}
-                      </span>
+                      >−</button>
+                      <span className="font-semibold text-gray-700 w-8 text-center text-lg">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="w-8 h-8 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all flex items-center justify-center font-bold hover:scale-110"
-                      >
-                        +
-                      </button>
+                      >+</button>
                     </div>
-                    <p className="font-semibold text-gray-800 text-lg">
-                      {(item.price * item.quantity).toLocaleString()} FCFA
-                    </p>
+                    <p className="font-semibold text-gray-800 text-lg">{(item.price * item.quantity).toLocaleString()} FCFA</p>
                   </div>
                 </div>
               ))}
@@ -479,7 +448,6 @@ function DetailResto() {
                   </div>
                 </div>
               </div>
-
               <button
                 onClick={handleValidateOrder}
                 className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg group"
@@ -496,12 +464,8 @@ function DetailResto() {
         )}
       </div>
 
-      {/* CSS Animations */}
       <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulseGreen {
           0%, 100% { background-color: white; }
           50% { background-color: #dcfce7; }

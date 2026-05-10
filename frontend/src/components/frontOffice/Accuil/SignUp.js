@@ -1,4 +1,3 @@
-// Signup.js
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -110,7 +109,7 @@ function Signup() {
     };
 
     try {
-      const result = await dispatch(register(userData)).unwrap();
+      await dispatch(register(userData));
       setSuccess('Inscription réussie ! Redirection vers la page de connexion...');
       
       // Redirection après 2 secondes
@@ -336,13 +335,13 @@ function Signup() {
               />
               <label htmlFor="accept-terms" className="ml-2 block text-sm text-gray-900">
                 J'accepte les{' '}
-                <a href="#" className="text-orange-500 hover:text-orange-600">
+                <button type="button" onClick={() => {}} className="text-orange-500 hover:text-orange-600 underline">
                   conditions d'utilisation
-                </a>
+                </button>
                 {' '}et la{' '}
-                <a href="#" className="text-orange-500 hover:text-orange-600">
+                <button type="button" onClick={() => {}} className="text-orange-500 hover:text-orange-600 underline">
                   politique de confidentialité
-                </a>
+                </button>
               </label>
             </div>
 

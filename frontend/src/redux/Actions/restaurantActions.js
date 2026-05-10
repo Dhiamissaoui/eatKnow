@@ -1,5 +1,32 @@
 import * as types from '../ActionTypes/restaurantTypes';
-import { getRestaurants, getRestaurantById, createRestaurant, updateRestaurant, deleteRestaurant } from '../api';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
+
+const getAuthHeader = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const getRestaurants = (params) => {
+  return axios.get(`${API_URL}/restaurants`, { params });
+};
+
+const getRestaurantById = (id) => {
+  return axios.get(`${API_URL}/restaurants/${id}`);
+};
+
+const createRestaurant = (data) => {
+  return axios.post(`${API_URL}/restaurants`, data, { headers: getAuthHeader() });
+};
+
+const updateRestaurant = (id, data) => {
+  return axios.put(`${API_URL}/restaurants/${id}`, data, { headers: getAuthHeader() });
+};
+
+const deleteRestaurant = (id) => {
+  return axios.delete(`${API_URL}/restaurants/${id}`, { headers: getAuthHeader() });
+};
 
 export const fetchRestaurants = (params = {}) => async (dispatch) => {
   try {

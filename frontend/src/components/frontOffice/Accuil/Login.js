@@ -1,4 +1,3 @@
-// Login.js
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -272,7 +271,8 @@ const handleSubmit = async (e) => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-orange-500 hover:text-orange-600 transition-colors">
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <a href="#" onClick={(e) => e.preventDefault()} className="font-medium text-orange-500 hover:text-orange-600 transition-colors">
                   Mot de passe oublié ?
                 </a>
               </div>
