@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -58,4 +58,13 @@ export const getCommandes = () => api.get('/commandes');
 export const getCommandeById = (id) => api.get(`/commandes/${id}`);
 export const updateCommandeStatus = (id, statut) => api.put(`/commandes/${id}/statut`, { statut });
 
-// Users API (admin only
+// Users API (admin only)
+export const getUsers = () => api.get('/users');
+export const getUserById = (id) => api.get(`/users/${id}`);
+export const updateUser = (id, data) => api.put(`/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/users/${id}`);
+
+// Stats API
+export const getStats = () => api.get('/stats');
+
+export default api;

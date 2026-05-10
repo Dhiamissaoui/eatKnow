@@ -7,7 +7,7 @@ function RestoList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
   const [isVisible, setIsVisible] = useState(false);
-  const [ setHoveredCard] = useState(null);
+  const [ hoveredCard,setHoveredCard] = useState(null);
   const sectionRef = useRef(null);
   
   const dispatch = useDispatch();
