@@ -7,7 +7,7 @@ function RestoList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
   const [isVisible, setIsVisible] = useState(false);
-  const [ hoveredCard,setHoveredCard] = useState(null);
+
   const sectionRef = useRef(null);
   
   const dispatch = useDispatch();
@@ -191,8 +191,7 @@ function RestoList() {
               <Link
                 key={restaurant._id}
                 to={`/DetailResto/${restaurant._id}`}
-                onMouseEnter={() => setHoveredCard(restaurant._id)}
-                onMouseLeave={() => setHoveredCard(null)}
+               
                 className={`group block bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${
                   isVisible ? 'animate-fade-in-up' : 'opacity-0'
                 }`}
