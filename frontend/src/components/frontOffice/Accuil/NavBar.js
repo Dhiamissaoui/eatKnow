@@ -15,13 +15,9 @@ function NavBar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Get auth state from Redux
   const { user, isAuthenticated } = useSelector(state => state.auth);
-  
-  // Check if user is admin
   const isAdmin = user?.role === 'admin';
 
-  // Locations en Tunisie
   const tunisiaLocations = [
     { city: 'Tunis Centre', area: 'Tunis', zones: ['Centre Ville', 'Mutuelleville', 'Belvédère', 'El Menzah'] },
     { city: 'Carthage', area: 'Tunis', zones: ['Carthage Byrsa', 'Carthage Hannibal', 'Carthage Dermech'] },
@@ -37,7 +33,6 @@ function NavBar() {
     { city: 'Kairouan', area: 'Kairouan', zones: ['Médina', 'Cité la Mosquée'] },
   ];
 
-  // Update cart count from localStorage
   useEffect(() => {
     const updateCartCount = () => {
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -47,33 +42,23 @@ function NavBar() {
 
     updateCartCount();
     window.addEventListener('cartUpdated', updateCartCount);
-    
-    return () => {
-      window.removeEventListener('cartUpdated', updateCartCount);
-    };
+    return () => window.removeEventListener('cartUpdated', updateCartCount);
   }, []);
 
   useEffect(() => {
-    // Récupérer la localisation sauvegardée
     const savedLocation = localStorage.getItem('userLocation');
-    if (savedLocation) {
-      setSelectedLocation(savedLocation);
-    }
-    
-    // Effet de scroll pour la navbar
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    if (savedLocation) setSelectedLocation(savedLocation);
+
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
-    
-    // Fermer le dropdown au clic en dehors
+
     const handleClickOutside = (event) => {
       if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target)) {
         setIsLocationOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
@@ -96,50 +81,35 @@ function NavBar() {
     setSelectedLocation(location.city);
     localStorage.setItem('userLocation', location.city);
     setIsLocationOpen(false);
-    // Optionnel: recharger les restaurants près de cette zone
     window.dispatchEvent(new CustomEvent('locationChange', { detail: location }));
   };
 
-  const handleAdminClick = () => {
-    navigate('/Dashboard');
-  };
-
-  // Get user's first name or email for display
   const getUserDisplayName = () => {
-    if (user?.nom) {
-      return user.nom.split(' ')[0]; // Return first name
-    }
-    if (user?.email) {
-      return user.email.split('@')[0];
-    }
+    if (user?.nom) return user.nom.split(' ')[0];
+    if (user?.email) return user.email.split('@')[0];
     return 'Utilisateur';
   };
 
-  // Get user initial for avatar
   const getUserInitial = () => {
-    if (user?.nom) {
-      return user.nom.charAt(0).toUpperCase();
-    }
-    if (user?.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
+    if (user?.nom) return user.nom.charAt(0).toUpperCase();
+    if (user?.email) return user.email.charAt(0).toUpperCase();
     return 'U';
   };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-      isScrolled 
-        ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' 
+      isScrolled
+        ? 'bg-white/95 backdrop-blur-md shadow-lg py-2'
         : 'bg-white shadow-md py-0'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          
-          {/* Logo Section avec animation */}
+
+          {/* Logo */}
           <Link to="/" className="flex-shrink-0 group">
             <div className="flex items-center">
-              <img 
-                className="h-12 w-auto transition-transform duration-300 group-hover:scale-105" 
+              <img
+                className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
                 src={LogoImage}
                 alt="Logo"
               />
@@ -149,7 +119,7 @@ function NavBar() {
             </div>
           </Link>
 
-          {/* Location Section avec dropdown */}
+          {/* Location Dropdown */}
           <div className="hidden md:block relative" ref={locationDropdownRef}>
             <button
               onClick={() => setIsLocationOpen(!isLocationOpen)}
@@ -169,11 +139,9 @@ function NavBar() {
               </svg>
             </button>
 
-            {/* Dropdown avec animations */}
             {isLocationOpen && (
               <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-slide-down">
                 <div className="max-h-96 overflow-y-auto">
-                  {/* Search in dropdown */}
                   <div className="p-3 border-b border-gray-100">
                     <div className="relative">
                       <input
@@ -186,8 +154,7 @@ function NavBar() {
                       </svg>
                     </div>
                   </div>
-                  
-                  {/* Locations list */}
+
                   {tunisiaLocations.map((location, idx) => (
                     <button
                       key={idx}
@@ -196,9 +163,7 @@ function NavBar() {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-semibold text-gray-800 group-hover:text-orange-600">
-                            {location.city}
-                          </p>
+                          <p className="font-semibold text-gray-800 group-hover:text-orange-600">{location.city}</p>
                           <p className="text-xs text-gray-500">{location.area}</p>
                         </div>
                         {selectedLocation === location.city && (
@@ -219,7 +184,7 @@ function NavBar() {
             )}
           </div>
 
-          {/* Search Bar animée */}
+          {/* Search Bar */}
           <div className="flex-1 max-w-lg mx-4">
             <form onSubmit={handleSearch} className="relative">
               <input
@@ -230,8 +195,8 @@ function NavBar() {
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
                 className={`w-full px-4 py-2 pl-10 pr-12 text-gray-700 bg-gray-100 border-2 rounded-full transition-all duration-300 ${
-                  isSearchFocused 
-                    ? 'border-orange-500 bg-white shadow-lg' 
+                  isSearchFocused
+                    ? 'border-orange-500 bg-white shadow-lg'
                     : 'border-transparent hover:bg-gray-50'
                 } focus:outline-none`}
               />
@@ -240,10 +205,7 @@ function NavBar() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <button 
-                type="submit"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center group"
-              >
+              <button type="submit" className="absolute inset-y-0 right-0 pr-3 flex items-center group">
                 <svg className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -251,10 +213,11 @@ function NavBar() {
             </form>
           </div>
 
-          {/* Right Section avec animations */}
+          {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {/* Cart Icon */}
-            <button 
+
+            {/* Cart */}
+            <button
               onClick={() => navigate('/Cart')}
               className="relative p-2 text-gray-600 hover:text-orange-500 transition-all duration-300 hover:scale-110"
             >
@@ -268,24 +231,21 @@ function NavBar() {
               )}
             </button>
 
-            {/* Admin Dashboard Button - Only visible for admin users */}
-            {isAuthenticated && isAdmin && (
-              <button
-                onClick={handleAdminClick}
-                className="relative p-2 text-purple-600 hover:text-purple-700 transition-all duration-300 hover:scale-110 group"
-                title="Dashboard Admin"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                  A
-                </span>
-              </button>
-            )}
+            {/* Back Office Button - always visible */}
+            <button
+              onClick={() => navigate('/Dashboard')}
+              className="relative p-2 text-purple-600 hover:text-purple-700 transition-all duration-300 hover:scale-110 group"
+              title="Back Office"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
 
-            {/* Notification Button */}
+            {/* Notifications - only when logged in */}
             {isAuthenticated && (
               <button className="relative p-2 text-gray-600 hover:text-orange-500 transition-all duration-300 hover:scale-110 group">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,7 +255,7 @@ function NavBar() {
               </button>
             )}
 
-            {/* Auth Buttons avec animations */}
+            {/* Auth Buttons */}
             {!isAuthenticated ? (
               <div className="flex items-center space-x-3">
                 <Link
@@ -313,18 +273,13 @@ function NavBar() {
               </div>
             ) : (
               <div className="flex items-center space-x-3 group">
-                {/* User Avatar with Name */}
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white font-semibold text-sm shadow-md">
                     {getUserInitial()}
                   </div>
                   <div className="hidden md:block">
-                    <p className="text-sm font-semibold text-gray-700">
-                      {getUserDisplayName()}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {isAdmin ? 'Administrateur' : 'Client'}
-                    </p>
+                    <p className="text-sm font-semibold text-gray-700">{getUserDisplayName()}</p>
+                    <p className="text-xs text-gray-500">{isAdmin ? 'Administrateur' : 'Client'}</p>
                   </div>
                 </div>
                 <button
@@ -339,19 +294,11 @@ function NavBar() {
         </div>
       </div>
 
-      {/* CSS Animations */}
       <style jsx>{`
         @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
         .animate-slide-down {
           animation: slideDown 0.2s ease-out;
         }
